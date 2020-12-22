@@ -8,16 +8,20 @@ using System.Text.RegularExpressions;
 
 namespace StockWorm.Repository
 {
-    public class SecuritiesGetListFromSSERepository:IGetDataBehavior
+    internal class SecuritiesGetListFromSSERepository:IGetDataBehavior
     {
         private HttpWebClient client;
 
         private List<SecurityDomain> values;
+        private int pageIndex;
+        private int pageSize;
 
-        public SecuritiesGetListFromSSERepository(List<SecurityDomain> values)
+        public SecuritiesGetListFromSSERepository(List<SecurityDomain> values,int pageIndex,int pageSize)
         {
-            InitWebClient();
             this.values = values;
+            this.pageIndex = pageIndex;
+            this.pageSize = pageSize;
+            InitWebClient();
         }
 
         private void InitWebClient()
@@ -31,7 +35,9 @@ namespace StockWorm.Repository
             client.Headers.Add("Host","query.sse.com.cn");
             client.Headers.Add("Referer","http://www.sse.com.cn/");
             client.Headers.Add("User-Agent","Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.66");
-            client.Data = "&jsonCallBack=jsonpCallback66846&isPagination=true&stockCode=&csrcCode=&areaName=&stockType=1&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize=10&pageHelp.pageNo=1&_=1608560370126";
+            Random random = new Random();
+            client.Data = string.Format("&jsonCallBack=jsonpCallback{0}&isPagination=true&stockCode=&csrcCode=&areaName=&stockType=1&pageHelp.cacheSize=1&pageHelp.beginPage={1}&pageHelp.pageSize={2}&pageHelp.pageNo={1}&_={3}",
+                random.Next(100000),pageIndex,pageSize,DateTime.Now.Subtract(new DateTime(1970,1,1,8,0,0)).Ticks);
         }
 
         public void GetData()

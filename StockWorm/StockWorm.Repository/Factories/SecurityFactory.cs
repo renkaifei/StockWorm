@@ -30,9 +30,15 @@ namespace StockWorm.Repository.Factories
             return instance;
         }
 
-        public IGetDataBehavior BuildSecuritiesGetListFromSSERepository(List<SecurityDomain> values)
+        public IGetDataBehavior BuildSecuritiesGetListFromSSERepository(List<SecurityDomain> values,int pageIndex,int pageSize)
         {
-            IGetDataBehavior behavior = new SecuritiesGetListFromSSERepository(values);
+            IGetDataBehavior behavior = new SecuritiesGetListFromSSERepository(values,pageIndex,pageSize);
+            return behavior;
+        }
+
+        public ICreateDataBehavior BuildSecuritiesCreateRepository(List<SecurityDomain> values)
+        {
+            ICreateDataBehavior behavior = new SecuritiesCreateRepository(values);
             return behavior;
         }
     }
