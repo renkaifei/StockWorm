@@ -1,14 +1,29 @@
 ﻿using System;
-using System.Net.Http;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using StockWorm.Repository;
+using StockWorm.Domain;
+using StockWorm.Domain.Interfaces;
+using StockWorm.Repository.Factories;
+
 
 namespace StockWorm.Application
 {
     public class SecurityService
     {
-        public void SynchronizeSecutiryA()
+        public List<SecurityDomain> GetListFromSSE()
         {
-            HttpClient client = new HttpClient();
+            List<SecurityDomain> securities = new List<SecurityDomain>();
+            IGetDataBehavior getDataBehavior = SecurityFactory.GetInstance().BuildSecuritiesGetListFromSSERepository(securities);
+            getDataBehavior.GetData();
+            return securities;
+        }
+
+        public void SaveSecurities(List<SecurityDomain> securities)
+        {
             
         }
     }
+        
 }

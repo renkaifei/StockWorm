@@ -1,8 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\StockWorm.Repository\StockWorm.Repository.csproj" />
     <ProjectReference Include="..\StockWorm.Domain\StockWorm.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SQLite" Version="5.0.1" />
   </ItemGroup>
 
   <PropertyGroup>
