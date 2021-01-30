@@ -5,7 +5,7 @@ create table if not exists Security
     SecurityAbbr varchar(128) not null,
     CompanyName varchar(128) not null,
     CompanyAbbr varchar(128) not null,
-    ListingData DateTime not null,
+    ListingDate DateTime not null,
 	ExchangeMarket varchar(10) not null
 );
 
