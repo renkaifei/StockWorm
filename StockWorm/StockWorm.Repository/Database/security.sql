@@ -3,7 +3,7 @@ create table if not exists Security
 	SecurityID integer not null primary key AUTOINCREMENT,
     SecurityCode varchar(10) not null,
     SecurityAbbr varchar(128) not null,
-    CompanyName varchar(128) not null,
+    CompanyCode varchar(128) not null,
     CompanyAbbr varchar(128) not null,
     ListingDate DateTime not null,
 	ExchangeMarket varchar(10) not null
