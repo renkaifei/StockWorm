@@ -1,103 +1,121 @@
 using Microsoft.Data.Sqlite;
 using System;
-using StockWorm.Repository.Interfaces;
+using StockWorm.Utils;
+using System.Data;
 
 namespace StockWorm.Repository.Context
 {
-    public class SqliteDatabaseContext:ITransaction
+    public class SqliteDatabaseContext
     {
-        private string connectionString = "Data Source='C:\\renkf\\projects\\database\\Stock.db';";
+        private string connectionString;
         private SqliteTransaction transaction;
+        private SqliteConnection connection;
 
-        public SqliteTransaction Transaction{ get{ return transaction; } }
-
-        private bool IsInTrans()
+        private bool InTrans()
         {
-            return transaction != null;
+            return connection.State == ConnectionState.Open && transaction != null;
         }
 
         public SqliteDatabaseContext()
         {
-            transaction = null;
+            connectionString = AppSetting.GetInstance().GetSqliteConnectionString();
+            if(string.IsNullOrEmpty(connectionString)) throw new ArgumentException("数据库连接不能为空");
         }
-    
+
+        private void OpenConnection()
+        {
+            if(connection == null)
+            {
+                connection = new SqliteConnection(connectionString);
+                connection.Open();
+            }
+        }
+
+        private void CloseConnection()
+        {
+            connection.Close();
+            connection.Dispose();
+            connection = null;
+        }
+
         public void BeginTransaction()
         {
-            SqliteConnection connection = new SqliteConnection(connectionString);
-            connection.Open();
+            OpenConnection();
             transaction = connection.BeginTransaction();
         }
 
-        public void JoinTrans(SqliteTransactionRepository transRepo)
-        {
-            transaction = transRepo.Transaction;
-        }
-
-        public void Commit()
+        public void CommitTransaction()
         {
             try
             {
                 transaction.Commit();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 transaction.Rollback();
                 throw ex;
             }
-        }
+            finally
+            {
+                transaction.Dispose();
+                transaction = null;
+            }
+        } 
 
-        public void Rollback()
+        public void RollbackTransaction()
         {
             transaction.Rollback();
+            transaction.Dispose();
+            transaction = null;
         }
 
-        public void ExecuteDataReader(Action<SqliteDataReader> action, string sql,params SqliteParameter[] sqliteParams)
+        public void ExecuteDataReader(Action<SqliteDataReader> action, string sql, params SqliteParameter[] sqliteParams)
         {
-            using(SqliteConnection conn = new SqliteConnection(connectionString))
+            try
             {
-                conn.Open();
-                using(SqliteCommand cmd = new SqliteCommand(sql,conn))
+                OpenConnection();
+                using(SqliteCommand cmd = new SqliteCommand())
                 {
-                    if(sqliteParams != null) cmd.Parameters.AddRange(sqliteParams);
+                    cmd.CommandText = sql;
+                    cmd.Connection = connection;
+                    if(InTrans()) cmd.Transaction = transaction;
+                    if (sqliteParams != null) cmd.Parameters.AddRange(sqliteParams);
                     using(SqliteDataReader reader = cmd.ExecuteReader())
                     {
                         action(reader);
                     }
                 }
+                if (!InTrans()) CloseConnection();
+            }
+            catch(Exception ex)
+            {
+                if(InTrans()) RollbackTransaction();
+                CloseConnection();
+                throw ex;
             }
         }
 
-        public void ExecuteNoQuery(string sql,params SqliteParameter[] sqliteParams)
+        public void ExecuteNoQuery(string sql, params SqliteParameter[] sqliteParams)
         {
-            if(IsInTrans())
+            try
             {
-                ExecuteNoQueryInTransaction(sql,sqliteParams);
-            }
-            else
-            {
-                ExecuteNoQueryNotInTransaction(sql,sqliteParams);
-            }
-        }
-
-        private void ExecuteNoQueryNotInTransaction(string sql,params SqliteParameter[] sqliteParams)
-        {
-            using(SqliteConnection conn = new SqliteConnection())
-            {
-                conn.Open();
-                using(SqliteCommand cmd  = new SqliteCommand(sql,conn))
+                OpenConnection();
+                using(SqliteCommand cmd = new SqliteCommand())
                 {
-                    cmd.Parameters.AddRange(sqliteParams);
+                    cmd.CommandText = sql;
+                    cmd.Connection = connection;
+                    if(InTrans()) cmd.Transaction = transaction;
+                    if(sqliteParams != null) cmd.Parameters.AddRange(sqliteParams);
                     cmd.ExecuteNonQuery();
                 }
+                if(!InTrans()) CloseConnection();
+            }
+            catch(Exception ex) 
+            {
+                if(InTrans()) RollbackTransaction();
+                CloseConnection();
+                throw ex;
             }
         }
-        private void ExecuteNoQueryInTransaction(string sql,params SqliteParameter[] sqliteParams)
-        {
-            SqliteCommand command = new SqliteCommand(sql,transaction.Connection);
-            command.Parameters.AddRange(sqliteParams);
-            command.Transaction = transaction;
-            command.ExecuteNonQuery();
-        }
-    
     }
 }
