@@ -2,10 +2,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StockWorm.Domain\StockWorm.Domain.csproj" />
+    <ProjectReference Include="..\StockWorm.Utils\StockWorm.Utils.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SQLite" Version="5.0.1" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
