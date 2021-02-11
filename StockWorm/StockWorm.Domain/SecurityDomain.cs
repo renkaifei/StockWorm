@@ -3,11 +3,24 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using StockWorm.Domain.Interfaces;
+using System.Collections.Generic;
 
 namespace StockWorm.Domain
 {
     public class SecurityDomain
     {
+        private long securityID = 0;
+        [Description("证券ID")]
+        public long SecurityID
+        {
+            get { return securityID; }
+            set 
+            {
+                if(securityID  == value) return ;
+                securityID = value;
+            }
+        }
+
         private string companyAbbr = "";
         [Description("公司简称")]
         [Required(ErrorMessage = "公司简称不能为空")]
@@ -23,8 +36,8 @@ namespace StockWorm.Domain
         }
 
         private string companyCode;
-        [Description("公司名称")]
-        [Required(ErrorMessage="公司名称不能为空")]
+        [Description("公司代码")]
+        [Required(ErrorMessage="公司代码不能为空")]
         [JsonProperty("COMPANY_CODE")]
         public string CompanyCode
         {
@@ -77,22 +90,17 @@ namespace StockWorm.Domain
             }
         }
     
-        private IGetDataBehavior getDataBehavior;
-        private ICreateDataBehavior createDataBehavior;
-
-        public void RegisterGetDataBehavior(IGetDataBehavior getDataBehavior)
+        private string exchangeMarket = "";
+        [Description("交易市场")]
+        public string ExchangeMarket
         {
-            this.getDataBehavior = getDataBehavior;
+            get { return exchangeMarket; }
+            set
+            {
+                if(exchangeMarket == value) return;
+                exchangeMarket = value;
+            }
         }
 
-        public void RegisterCreateBehavior(ICreateDataBehavior createDataBehavior)
-        {
-            this.createDataBehavior = createDataBehavior;
-        }
-
-        public void GetData()
-        {
-            getDataBehavior.GetData();
-        }
     }
 }

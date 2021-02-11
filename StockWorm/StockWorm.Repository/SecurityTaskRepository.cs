@@ -3,7 +3,7 @@ using StockWorm.Repository.Context;
 using System.Collections.Generic;
 using System.Data;
 using Microsoft.Data.Sqlite;
-using StockWorm.Repository.Factory;
+using StockWorm.Domain.Factory;
 
 namespace StockWorm.Repository
 {
@@ -23,7 +23,7 @@ namespace StockWorm.Repository
             this.sqliteDb = sqliteDb;
         }
 
-        public SecurityTaskDomain Create(SecurityTaskDomain securityTask)
+        public SecurityTaskDomain InsertIntoDB(SecurityTaskDomain securityTask)
         {
             string sql = "INSERT INTO SecurityTask(SecurityCode,ExchangeMarket,BeginDate,EndDate,IsFinished)Values(@SecurityCode,@ExchangeMarket,@BeginDate,@EndDate,@IsFinished)";
             SqliteParameter prmSecurityCode = new SqliteParameter("@SecurityCode", DbType.String) { Value = securityTask.SecurityCode };
@@ -44,10 +44,10 @@ namespace StockWorm.Repository
             return securityTask;
         }
 
-        public SecurityTaskDomain GetOneTask()
+        public SecurityTaskDomain GetOneUnFinishedTask()
         {
             SecurityTaskDomain securityTask = securityTaskFactory.Create();
-            string sql = "SELECT TaskID,SecurityCode,BeginDate,EndDate,IsFinished FROM SecurityTask LIMIT 1";
+            string sql = "SELECT TaskID,SecurityCode,BeginDate,EndDate,IsFinished FROM SecurityTask where IsFinished = 0 LIMIT 1";
             sqliteDb.ExecuteDataReader(reader =>
             {
                 if (reader.HasRows)
@@ -67,8 +67,16 @@ namespace StockWorm.Repository
         {
             foreach(SecurityTaskDomain securityTask in securityTasks)
             {
-                Create(securityTask);
+                InsertIntoDB(securityTask);
             }
+        }
+    
+        public void UpdateTaskStatus(SecurityTaskDomain securityTask)
+        {
+            string sql = "Update SecurityTask SET IsFinished = @IsFinished Where SecurityCode = @SecurityCode";
+            SqliteParameter prmSecurityCode = new SqliteParameter("@SecurityCode", DbType.String) { Value = securityTask.SecurityCode };
+            SqliteParameter prmIsFinished = new SqliteParameter("@IsFinished",DbType.Int32){ Value = securityTask.IsFinished ? 1: 0};
+            sqliteDb.ExecuteNoQuery(sql, prmSecurityCode, prmIsFinished);
         }
     }
 }

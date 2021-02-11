@@ -50,6 +50,7 @@ namespace StockWorm.Repository
                 while(reader.Read())
                 {
                     security = new SecurityDomain();
+                    security.SecurityCode = reader.GetString(0);
                     securitiesFromDB.Add(security);
                 }
             },sql);

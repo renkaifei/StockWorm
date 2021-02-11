@@ -9,6 +9,8 @@ create table if not exists Security
 	ExchangeMarket varchar(10) not null
 );
 
+CREATE UNIQUE INDEX security_code_index on Security (SecurityCode,ExchangeMarket);
+
 create table if not exists SecurityTask(
 	TaskID integer not null primary key AUTOINCREMENT,
 	SecurityCode varchar(10) not null,
@@ -36,4 +38,11 @@ create table if not exists SecurityDayQuotation
 	MarketValue float not null,
 	NegoValue float not null
 );
+
+create table if not exists log
+(
+	id integer not null primary key AUTOINCREMENT,
+	logName VARCHAR(100) not null,
+	description varchar(4000) not null 
+)
 

@@ -52,6 +52,17 @@ namespace StockWorm.Repository.Net
             }
         }
 
+        private Encoding encoding = Encoding.UTF8;
+        [Description("编码方式")]
+        public Encoding Encoding 
+        {
+            get { return encoding; }
+            set
+            {
+                if(encoding == value) return;
+                encoding = value;
+            }
+        }
         public HttpWebClient()
         {
             headers = new Dictionary<string, string>();
@@ -70,12 +81,13 @@ namespace StockWorm.Repository.Net
             {
                 using(Stream sm = response.GetResponseStream())
                 {
-                    using(StreamReader reader = new StreamReader(sm))
+                    using(StreamReader reader = new StreamReader(sm,encoding))
                     {
                         return reader.ReadToEnd();
                     }
                 }
             }
         }
+
     }
 }
