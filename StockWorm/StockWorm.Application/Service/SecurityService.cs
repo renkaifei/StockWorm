@@ -13,16 +13,18 @@ namespace StockWorm.Application.Service
         public void SyncSecuritiesFromSSE()
         {
             SqliteDatabaseContext sqliteDb = new SqliteDatabaseContext();
-            SecurityRepository repo = new SecurityRepository(sqliteDb);
-            List<SecurityDomain> securitiesFromSSE = repo.GetSecuritiesFromSSE();
-            List<SecurityDomain> securitiesFromDB = repo.GetSecuritiesFromDB();
+            SecurityRepository securityRepo = new SecurityRepository(sqliteDb);
+            SecurityTaskRepository securityTaskRepository = new SecurityTaskRepository(sqliteDb);
+
+            #region 新增证券
+            List<SecurityDomain> securitiesFromSSE = securityRepo.GetSecuritiesFromSSE();
+            List<SecurityDomain> securitiesFromDB = securityRepo.GetSecuritiesFromDB();
             List<SecurityDomain> securities = new List<SecurityDomain>();
             Dictionary<string,string> dicStockDB = new Dictionary<string, string>();
             foreach(SecurityDomain security in securitiesFromDB)
             {
                 dicStockDB.Add(security.SecurityCode,"");
             }
-
             for(int i =0;i < securitiesFromSSE.Count;i++)
             {
                 if(!dicStockDB.ContainsKey(securitiesFromSSE[i].SecurityCode))
@@ -30,28 +32,19 @@ namespace StockWorm.Application.Service
                     securities.Add(securitiesFromSSE[i]);
                 }
             }
-
+            #endregion
+            
+            #region 保持证券，证券任务到数据库
+            sqliteDb.BeginTransaction();
             SecurityTaskDomain securityTask;
-            List<SecurityTaskDomain> securityTasks = new List<SecurityTaskDomain>();
-            SecurityTaskFactory taskFactory = new SecurityTaskFactory();
             foreach(SecurityDomain security in securities)
             {
-                securityTask = taskFactory.Create();
-                securityTask.SecurityCode = security.SecurityCode;
-                securityTask.ExchangeMarket = "SSE";
-                securityTask.BeginDate = security.ListingDate;
-                securityTask.EndDate = security.ListingDate.AddMonths(1);
-                if(securityTask.EndDate.Date > DateTime.Now.AddDays(-1).Date)
-                {
-                    securityTask.EndDate = DateTime.Now.AddDays(-1).Date;
-                }
-                securityTasks.Add(securityTask);
+                securityRepo.InsertIntoDB(security);
+                securityTask = security.BuildStartTask();
+                securityTaskRepository.InsertIntoDB(securityTask);
             }
-            SecurityTaskRepository securityTaskRepository = new SecurityTaskRepository(sqliteDb);
-            sqliteDb.BeginTransaction();
-            repo.InsertIntoDB(securities);
-            securityTaskRepository.InsertIntoDB(securityTasks);
             sqliteDb.CommitTransaction();
+            #endregion
         }
 
     }
