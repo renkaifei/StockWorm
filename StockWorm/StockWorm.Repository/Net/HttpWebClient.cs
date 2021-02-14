@@ -35,7 +35,7 @@ namespace StockWorm.Repository.Net
             get { return method; }
             set
             {
-                if(method == value) return;
+                if (method == value) return;
                 method = value;
             }
         }
@@ -45,21 +45,21 @@ namespace StockWorm.Repository.Net
         public string Data
         {
             get { return data; }
-            set 
+            set
             {
-                if(data == value) return;
+                if (data == value) return;
                 data = value;
             }
         }
 
         private Encoding encoding = Encoding.UTF8;
         [Description("编码方式")]
-        public Encoding Encoding 
+        public Encoding Encoding
         {
             get { return encoding; }
             set
             {
-                if(encoding == value) return;
+                if (encoding == value) return;
                 encoding = value;
             }
         }
@@ -70,22 +70,29 @@ namespace StockWorm.Repository.Net
 
         public string SendGetRequest()
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(string.Format("{0}?{1}",url,data));
-            request.Method = "GET";
-            foreach(KeyValuePair<string,string> item in headers)
+            try
             {
-                request.Headers.Add(item.Key,item.Value);
-            }
-
-            using(HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-            {
-                using(Stream sm = response.GetResponseStream())
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(string.Format("{0}?{1}", url, data));
+                request.Method = "GET";
+                foreach (KeyValuePair<string, string> item in headers)
                 {
-                    using(StreamReader reader = new StreamReader(sm,encoding))
+                    request.Headers.Add(item.Key, item.Value);
+                }
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    using (Stream sm = response.GetResponseStream())
                     {
-                        return reader.ReadToEnd();
+                        using (StreamReader reader = new StreamReader(sm, encoding))
+                        {
+                            return reader.ReadToEnd();
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(string.Format("ex.Message={0},requestData={1}",ex.Message,data));
             }
         }
 

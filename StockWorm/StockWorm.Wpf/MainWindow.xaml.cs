@@ -55,7 +55,7 @@ namespace StockWorm.Wpf
                 }
                 catch(Exception ex)
                 {
-                    this.Dispatcher.Invoke(new Action<string>(ShowErrorMessage),ex.StackTrace);
+                    this.Dispatcher.Invoke(new Action<string>(ShowErrorMessage),ex.Message);
                 }
                 finally
                 {
