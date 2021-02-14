@@ -23,8 +23,8 @@ namespace StockWorm.UnitTest
             {
                 SecurityService securityService = new SecurityService();
                 securityService.SyncSecuritiesFromSSE();
-                SecurityDayQuotationService dayQuotationService = new SecurityDayQuotationService();
-                dayQuotationService.SyncSSEDayQuotationFromWangYI();
+                //SecurityDayQuotationService dayQuotationService = new SecurityDayQuotationService();
+                //dayQuotationService.SyncSSEDayQuotationFromWangYI();
             }
             catch(Exception ex)
             {

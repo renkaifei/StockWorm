@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\StockWorm.Domain\StockWorm.Domain.csproj" />
     <ProjectReference Include="..\StockWorm.Application\StockWorm.Application.csproj" />
+    <ProjectReference Include="..\StockWorm.Utils\StockWorm.Utils.csproj" />
   </ItemGroup>
 
 </Project>
