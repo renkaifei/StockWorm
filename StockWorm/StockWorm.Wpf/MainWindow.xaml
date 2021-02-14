@@ -1,0 +1,23 @@
+﻿<Window x:Class="StockWorm.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StockWorm.Wpf"
+        xmlns:localcommand ="clr-namespace:StockWorm.Wpf.Commands"
+        mc:Ignorable="d"
+        Title="证券采集" Height="450" Width="800">
+    <StackPanel>
+        <Ribbon Name="DataAcquisition" Title="">
+            <RibbonTab Name="SecurityAcquisition" Header="证券采集">
+                <RibbonGroup Name="ASecurityAcquisition" Header="A股">
+                    <RibbonButton Name="BtnBasicSecurityInfoAcquisition" Label="采集基础信息" ToolTip="采集基础信息" Click="BtnBasicSecurityInfoAcquisition_Click"></RibbonButton>
+                    <RibbonButton Name="BtnStockDayQuotation" Label="股票日行情" Click="BtnStockDayQuotation_Click" />
+                </RibbonGroup>
+            </RibbonTab>
+        </Ribbon>
+        <Label Name="lblErrorMessage">
+            
+        </Label>
+    </StackPanel>
+</Window>

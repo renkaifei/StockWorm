@@ -33,11 +33,12 @@ namespace StockWorm.Wpf
 
         private void MainWindow_Load(object sender, RoutedEventArgs e)
         {
+            syncSecurityInfoFromSSE();
             DateTime nextDay = DateTime.Now.AddDays(1).Date;
             long dueTime = (long)(nextDay - DateTime.Now).TotalMilliseconds;
             long period = 1000 * 60 * 60 * 24;
             myTimer = new Timer((obj) =>{
-                if(!isRunning) syncSecurityInfoFromSSE();
+                if(!isRunning) syncSecurityInfoFromSSE(); 
             },null,dueTime,period);
         }
 
@@ -52,9 +53,9 @@ namespace StockWorm.Wpf
                     SecurityDayQuotationService dayQuotationService = new SecurityDayQuotationService();
                     dayQuotationService.SyncSSEDayQuotationFromWangYI();
                 }
-                catch(Exception)
+                catch(Exception ex)
                 {
-                    
+                    this.Dispatcher.Invoke(new Action<string>(ShowErrorMessage),ex.StackTrace);
                 }
                 finally
                 {
@@ -72,12 +73,7 @@ namespace StockWorm.Wpf
     
         private void ShowErrorMessage(string message)
         {
-           
-        }
-    
-        private void EnableBtnBasicSecurityInfoAcquisition()
-        {
-            
+           lblErrorMessage.Content = message;
         }
     
         private void BtnStockDayQuotation_Click(object sender,RoutedEventArgs e)

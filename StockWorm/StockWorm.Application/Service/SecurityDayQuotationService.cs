@@ -16,65 +16,29 @@ namespace StockWorm.Application.Service
 
         public void SyncSSEDayQuotationFromWangYI()
         {
-            SecurityTaskDomain securityTask = GetOneUnFinishedTask();
-            while (!securityTask.IsFuture())
+            SqliteDatabaseContext sqliteDb = new SqliteDatabaseContext();
+            SecurityDayQuotationRepository securityDayQuotationRepository = new SecurityDayQuotationRepository(sqliteDb);
+            SecurityTaskRepository securityTaskRepository = new SecurityTaskRepository(sqliteDb);
+            SecurityTaskEngine securityTaskEngine = new SecurityTaskEngine();
+            SecurityTaskDomain securityTask = securityTaskEngine.Pop();
+            List<SecurityDayQuotationDomain> lst = new List<SecurityDayQuotationDomain>();
+            SecurityTaskDomain nextSecurityTask;
+            while(!securityTask.IsEmpty())
             {
-                List<SecurityDayQuotationDomain> securityDayQuotations = GetSecurityDayQuotations(securityTask);
-                SqliteDatabaseContext sqliteDb = new SqliteDatabaseContext();
-                SecurityDayQuotationRepository securityDayQuotationRepository = new SecurityDayQuotationRepository(sqliteDb);
-                SecurityTaskRepository securityTaskRepository = new SecurityTaskRepository(sqliteDb);
+                lst = securityDayQuotationRepository.GetSSEDayQuotationFromWangYi(securityTask.SecurityCode,securityTask.BeginDate,securityTask.EndDate);
                 sqliteDb.BeginTransaction();
-                if(securityDayQuotations.Count > 0)
+                foreach(SecurityDayQuotationDomain securityDayQuotation in lst)
                 {
-                    securityDayQuotationRepository.InsertIntoDB(securityDayQuotations);
+                    securityDayQuotationRepository.InsertIntoDB(securityDayQuotation);
                 }
                 securityTask.IsFinished = true;
                 securityTaskRepository.UpdateTaskStatus(securityTask);
-                SecurityTaskDomain nextSecurityTask = CreateNextTask(securityTask);
-                if(!nextSecurityTask.IsLast())
-                {
-                    securityTaskRepository.InsertIntoDB(nextSecurityTask);
-                }
-                else
-                {
-                    SecurityTaskDomain futureSecurityTask = CreateFutureTask(nextSecurityTask);
-                    securityTaskRepository.InsertIntoDB(futureSecurityTask);
-                }
+                nextSecurityTask = securityTask.BuildNextTask();
+                securityTaskRepository.InsertIntoDB(nextSecurityTask);
+
                 sqliteDb.CommitTransaction();
-                securityTask = GetOneUnFinishedTask();
+                securityTask = securityTaskEngine.Pop();
             }
         }
-
-        private List<SecurityDayQuotationDomain> GetSecurityDayQuotations(SecurityTaskDomain securityTask)
-        {
-            SecurityDayQuotationRepository securityDayQuotationRepository = new SecurityDayQuotationRepository();
-            List<SecurityDayQuotationDomain> securityDayQuotations = securityDayQuotationRepository.GetSSEDayQuotationFromWangYi(securityTask.SecurityCode, securityTask.BeginDate,
-            securityTask.EndDate);
-            return securityDayQuotations;
-        }
-
-        private SecurityTaskDomain GetOneUnFinishedTask()
-        {
-            SecurityTaskFactory securityTaskFactory = new SecurityTaskFactory();
-            SecurityTaskDomain securityTask = securityTaskFactory.Create();
-            SecurityTaskRepository securityTaskRepository = new SecurityTaskRepository();
-            securityTask = securityTaskRepository.GetOneUnFinishedTask();
-            return securityTask;
-        }
-
-        private SecurityTaskDomain CreateNextTask(SecurityTaskDomain securityTask)
-        {
-            SecurityTaskFactory securityTaskFactory = new SecurityTaskFactory();
-            SecurityTaskDomain tempSecurityTask = securityTaskFactory.CreateNextTask(securityTask);
-            return tempSecurityTask;
-        }
-
-        private SecurityTaskDomain CreateFutureTask(SecurityTaskDomain securityTask)
-        {
-            SecurityTaskFactory securityTaskFactory = new SecurityTaskFactory();
-            SecurityTaskDomain tempSecurityTask = securityTaskFactory.CreateFutureTask(securityTask);
-            return tempSecurityTask;
-        }
-
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using Microsoft.Data.Sqlite;
 using StockWorm.Domain.Factory;
+using System;
 
 namespace StockWorm.Repository
 {
@@ -61,6 +62,28 @@ namespace StockWorm.Repository
                 }
             }, sql);
             return securityTask;
+        }
+
+        public List<SecurityTaskDomain> GetListUnFinished(int count,DateTime date)
+        {
+            SecurityTaskDomain securityTask;
+            List<SecurityTaskDomain> lst = new List<SecurityTaskDomain>();
+            string sql = string.Format("SELECT TaskID,SecurityCode,ExchangeMarket,BeginDate,EndDate,IsFinished FROM SecurityTask where IsFinished = 0 and BeginDate < @BeginDate LIMIT {0}",count);
+            SqliteParameter prmBeginDate = new SqliteParameter("@BeginDate",DbType.DateTime){ Value = date };
+            sqliteDb.ExecuteDataReader(reader =>{
+                while(reader.Read())
+                {
+                    securityTask = new SecurityTaskDomain();
+                    securityTask.TaskID = reader.GetInt64(0);
+                    securityTask.SecurityCode = reader.GetString(1);
+                    securityTask.ExchangeMarket = reader.GetString(2);
+                    securityTask.BeginDate = reader.GetDateTime(3);
+                    securityTask.EndDate = reader.GetDateTime(4);
+                    securityTask.IsFinished = false;
+                    lst.Add(securityTask);
+                }
+            },sql,prmBeginDate);
+            return lst;
         }
 
         public void InsertIntoDB(List<SecurityTaskDomain> securityTasks)

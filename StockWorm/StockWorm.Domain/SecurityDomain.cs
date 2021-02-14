@@ -109,13 +109,13 @@ namespace StockWorm.Domain
             tempTask.ExchangeMarket = exchangeMarket;
             tempTask.BeginDate = listingDate;
             tempTask.EndDate = listingDate.AddMonths(1);
-            if(tempTask.EndDate.Date > DateTime.Now.AddDays(-1).Date)
+            if(tempTask.EndDate.Date >= DateTime.Now.Date)
             {
                 tempTask.EndDate = DateTime.Now.AddDays(-1).Date;
             }
-            if(tempTask.BeginDate == tempTask.EndDate)
+            if(tempTask.BeginDate > tempTask.EndDate)
             {
-                tempTask.EndDate = tempTask.BeginDate.AddDays(1);
+                tempTask.EndDate = tempTask.BeginDate;
             }
             return tempTask;
         }

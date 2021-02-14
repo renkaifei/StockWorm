@@ -91,5 +91,26 @@ namespace StockWorm.Domain
         {
             return BeginDate == EndDate && BeginDate.Date == DateTime.Now.Date;
         }
+    
+        public bool IsEmpty()
+        {
+            return taskID == 0 && string.IsNullOrEmpty(securityCode);
+        }
+    
+        public SecurityTaskDomain BuildNextTask()
+        {
+            SecurityTaskDomain tempTask = new SecurityTaskDomain();
+            tempTask.SecurityCode = securityCode;
+            tempTask.ExchangeMarket = exchangeMarket;
+            tempTask.BeginDate = endDate.AddDays(1);
+            tempTask.EndDate = tempTask.BeginDate.AddMonths(1);
+            if (tempTask.EndDate >= DateTime.Now.Date)
+            {
+                tempTask.EndDate = DateTime.Now.AddDays(-1).Date;
+            }
+            if(tempTask.BeginDate > tempTask.EndDate) tempTask.EndDate = tempTask.BeginDate;
+            tempTask.IsFinished = false;
+            return tempTask;
+        }
     }
 }

@@ -2,12 +2,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StockWorm.Application\StockWorm.Application.csproj" />
+    <ProjectReference Include="..\StockWorm.Domain\StockWorm.Domain.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
 
 </Project>
