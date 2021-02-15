@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using StockWorm.Repository;
 using StockWorm.Domain;
-using StockWorm.Domain.Factory;
 using StockWorm.Repository.Context;
-
+using StockWorm.Repository.Factory;
 
 namespace StockWorm.Application.Service
 {
@@ -12,13 +11,13 @@ namespace StockWorm.Application.Service
     {
         public void SyncSecuritiesFromSSE()
         {
-            SqliteDatabaseContext sqliteDb = new SqliteDatabaseContext();
-            SecurityRepository securityRepo = new SecurityRepository(sqliteDb);
-            SecurityTaskRepository securityTaskRepository = new SecurityTaskRepository(sqliteDb);
-
+            DatabaseContext dbContext = DatabaseContextFactory.GetInstance().CreateDatabaseContext();
+            SecurityRepository securityRepo = SecurityRepositoryFactory.GetInstance().Create(dbContext);
+            SecurityTaskRepository securityTaskRepository = SecurityTaskRepositoryFactory.GetInstance().Create(dbContext);
+            SecurityFromSSERepository securityFromSSERepository = new SecurityFromSSERepository();
             #region 新增证券
-            List<SecurityDomain> securitiesFromSSE = securityRepo.GetSecuritiesFromSSE();
-            List<SecurityDomain> securitiesFromDB = securityRepo.GetSecuritiesFromDB();
+            List<SecurityDomain> securitiesFromSSE = securityFromSSERepository.GetSecuritiesFromSSE();
+            List<SecurityDomain> securitiesFromDB = securityRepo.GetList();
             List<SecurityDomain> securities = new List<SecurityDomain>();
             Dictionary<string,string> dicStockDB = new Dictionary<string, string>();
             foreach(SecurityDomain security in securitiesFromDB)
@@ -35,7 +34,7 @@ namespace StockWorm.Application.Service
             #endregion
             
             #region 保持证券，证券任务到数据库
-            sqliteDb.BeginTransaction();
+            dbContext.BeginTransaction();
             SecurityTaskDomain securityTask;
             foreach(SecurityDomain security in securities)
             {
@@ -43,10 +42,16 @@ namespace StockWorm.Application.Service
                 securityTask = security.BuildStartTask();
                 securityTaskRepository.InsertIntoDB(securityTask);
             }
-            sqliteDb.CommitTransaction();
+            dbContext.CommitTransaction();
             #endregion
         }
 
+        public List<SecurityDomain> GetListInPage(int pageIndex,int pageSize,string exChange)
+        {
+            SecurityRepository securityRepo = SecurityRepositoryFactory.GetInstance().Create();
+            List<SecurityDomain> lst = securityRepo.GetListInPage(pageIndex,pageSize,exChange);
+            return lst;
+        }
     }
 
 }

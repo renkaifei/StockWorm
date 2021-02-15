@@ -14,6 +14,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading;
 using StockWorm.Application.Service;
+using StockWorm.Domain;
+using StockWorm.Wpf.Component;
 
 namespace StockWorm.Wpf
 {
@@ -33,16 +35,10 @@ namespace StockWorm.Wpf
 
         private void MainWindow_Load(object sender, RoutedEventArgs e)
         {
-            syncSecurityInfoFromSSE();
-            DateTime nextDay = DateTime.Now.AddDays(1).Date;
-            long dueTime = (long)(nextDay - DateTime.Now).TotalMilliseconds;
-            long period = 1000 * 60 * 60 * 24;
-            myTimer = new Timer((obj) =>{
-                if(!isRunning) syncSecurityInfoFromSSE(); 
-            },null,dueTime,period);
+            SecurityDataTable securityDataTable = new SecurityDataTable();
         }
 
-         private void syncSecurityInfoFromSSE()
+        private void syncSecurityInfoFromSSE()
         {
             syncSecurityInfoFromSSETaskSource = new CancellationTokenSource();
             syncSecurityInfoFromSSETask = Task.Factory.StartNew(() =>{
@@ -55,7 +51,7 @@ namespace StockWorm.Wpf
                 }
                 catch(Exception ex)
                 {
-                    this.Dispatcher.Invoke(new Action<string>(ShowErrorMessage),ex.Message);
+                    this.Dispatcher.Invoke(new Action<string>(ShowMessage),ex.Message);
                 }
                 finally
                 {
@@ -66,19 +62,39 @@ namespace StockWorm.Wpf
             isRunning = true;
         }
 
-        private void BtnBasicSecurityInfoAcquisition_Click(object sender,RoutedEventArgs e)
+        private void BtnStartCollecting_Click(object sender,RoutedEventArgs e)
         {
-            
+            if(isRunning) return;
+            ShowMessage("开启股票信息采集");
+            syncSecurityInfoFromSSE();
+            DateTime nextDay = DateTime.Now.AddDays(1).Date;
+            long dueTime = (long)(nextDay - DateTime.Now).TotalMilliseconds;
+            long period = 1000 * 60 * 60 * 24;
+            myTimer = new Timer((obj) =>{
+                if(!isRunning) syncSecurityInfoFromSSE(); 
+            },null,dueTime,period);
         }
-    
-        private void ShowErrorMessage(string message)
+
+        private void BtnStopCollecting_Click(object sender,RoutedEventArgs e)
         {
-           lblErrorMessage.Content = message;
+            if(!isRunning) return;
+            ShowMessage("停止股票信息采集");
+            isRunning = false;
+            syncSecurityInfoFromSSETaskSource.Cancel();
         }
-    
-        private void BtnStockDayQuotation_Click(object sender,RoutedEventArgs e)
+
+        private void BtnSSESecurityInfo_Click(object sender,RoutedEventArgs e)
         {
-            
+            SecurityService securityService = new SecurityService();
+            List<SecurityDomain> securities = securityService.GetListInPage(1,50,"SSE");
+
         }
+
+        private void ShowMessage(string message)
+        {
+           txtErrorMessage.Text = message;
+        }
+
+        
     }
 }

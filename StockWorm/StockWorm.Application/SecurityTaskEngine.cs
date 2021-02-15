@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using StockWorm.Domain;
 using StockWorm.Repository;
 using System;
+using StockWorm.Repository.Factory;
 
 namespace StockWorm.Application
 {
@@ -28,7 +29,7 @@ namespace StockWorm.Application
 
         private void GetSecurityTasksInDB()
         {
-            SecurityTaskRepository repo = new SecurityTaskRepository();
+            SecurityTaskRepository repo = SecurityTaskRepositoryFactory.GetInstance().Create();
             List<SecurityTaskDomain> lst = repo.GetListUnFinished(200,DateTime.Now.Date);
             foreach(SecurityTaskDomain securityTask in lst)
             {

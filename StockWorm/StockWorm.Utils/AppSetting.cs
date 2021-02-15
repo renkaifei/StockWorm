@@ -11,6 +11,9 @@ namespace StockWorm.Utils
         private static AppSetting setting;
         private static object obj = new object();
         private JObject configObj = null;
+        private string sqliteConnectionString = "";
+        private string mssqlConnectionString = "";
+        private string dbType = "";
 
         private AppSetting()
         {
@@ -26,7 +29,7 @@ namespace StockWorm.Utils
                 }
             }
 
-            tempJson = Regex.Replace(tempJson,"[\\r,\\t,\\n]","");
+            tempJson = Regex.Replace(tempJson,"[\\r\\t\\n]","");
             configObj = JsonConvert.DeserializeObject<JObject>(tempJson);
         }
 
@@ -45,9 +48,44 @@ namespace StockWorm.Utils
             return setting;
         }
 
+        
         public string GetSqliteConnectionString()
         {
-            return configObj.SelectToken("connectionString").ToObject<string>();
+            if(!string.IsNullOrEmpty(sqliteConnectionString))
+            {
+                return sqliteConnectionString;
+            }
+            else
+            {
+                sqliteConnectionString = configObj.SelectToken("sqliteConnectionString").ToObject<string>();
+                return sqliteConnectionString;
+            } 
+        }
+
+        public string GetMSSqlConnectionString()
+        {
+            if(!string.IsNullOrEmpty(mssqlConnectionString))
+            {
+                return mssqlConnectionString;
+            }
+            else
+            {
+                mssqlConnectionString = configObj.SelectToken("mssqlConnectionString").ToObject<string>();
+                return mssqlConnectionString;
+            }
+        }
+
+        public string GetDatabaseType()
+        {
+            if(!string.IsNullOrEmpty(dbType))
+            {
+                return dbType;
+            }
+            else
+            {
+                dbType = configObj.SelectToken("dbType").ToObject<string>();
+                return dbType;
+            } 
         }
     }
 }

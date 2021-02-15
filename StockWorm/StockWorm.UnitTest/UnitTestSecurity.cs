@@ -3,7 +3,6 @@ using StockWorm.Domain;
 using System.Collections.Generic;
 using StockWorm.Application.Service;
 using System;
-using StockWorm.Domain.Interfaces;
 
 namespace StockWorm.UnitTest
 {

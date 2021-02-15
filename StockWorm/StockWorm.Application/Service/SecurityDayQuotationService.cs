@@ -1,8 +1,8 @@
 using StockWorm.Domain;
 using StockWorm.Repository;
 using System.Collections.Generic;
-using StockWorm.Domain.Factory;
 using StockWorm.Repository.Context;
+using StockWorm.Repository.Factory;
 
 namespace StockWorm.Application.Service
 {
@@ -16,17 +16,18 @@ namespace StockWorm.Application.Service
 
         public void SyncSSEDayQuotationFromWangYI()
         {
-            SqliteDatabaseContext sqliteDb = new SqliteDatabaseContext();
-            SecurityDayQuotationRepository securityDayQuotationRepository = new SecurityDayQuotationRepository(sqliteDb);
-            SecurityTaskRepository securityTaskRepository = new SecurityTaskRepository(sqliteDb);
+            DatabaseContext dbContext = DatabaseContextFactory.GetInstance().CreateDatabaseContext();
+            SecurityDayQuotationRepository securityDayQuotationRepository = SecurityDayQuotationRepositoryFactory.GetInstance().Create(dbContext);
+            SecurityTaskRepository securityTaskRepository = SecurityTaskRepositoryFactory.GetInstance().Create(dbContext);
+            SecurityDayQuotationFromWangYIRepository securityDayQuotationFromWangYIRepository = new SecurityDayQuotationFromWangYIRepository();
             SecurityTaskEngine securityTaskEngine = new SecurityTaskEngine();
             SecurityTaskDomain securityTask = securityTaskEngine.Pop();
             List<SecurityDayQuotationDomain> lst = new List<SecurityDayQuotationDomain>();
             SecurityTaskDomain nextSecurityTask;
             while(!securityTask.IsEmpty())
             {
-                lst = securityDayQuotationRepository.GetSSEDayQuotationFromWangYi(securityTask.SecurityCode,securityTask.BeginDate,securityTask.EndDate);
-                sqliteDb.BeginTransaction();
+                lst = securityDayQuotationFromWangYIRepository.GetSSEDayQuotationFromWangYi(securityTask.SecurityCode,securityTask.BeginDate,securityTask.EndDate);
+                dbContext.BeginTransaction();
                 foreach(SecurityDayQuotationDomain securityDayQuotation in lst)
                 {
                     securityDayQuotationRepository.InsertIntoDB(securityDayQuotation);
@@ -35,8 +36,7 @@ namespace StockWorm.Application.Service
                 securityTaskRepository.UpdateTaskStatus(securityTask);
                 nextSecurityTask = securityTask.BuildNextTask();
                 securityTaskRepository.InsertIntoDB(nextSecurityTask);
-
-                sqliteDb.CommitTransaction();
+                dbContext.CommitTransaction();
                 securityTask = securityTaskEngine.Pop();
             }
         }

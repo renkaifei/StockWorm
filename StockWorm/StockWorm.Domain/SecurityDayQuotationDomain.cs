@@ -163,7 +163,7 @@ namespace StockWorm.Domain
         }
 
         private double marketValue = 0;
-        [Description("市价总值（万元）")]
+        [Description("市价总值（亿）")]
         public double MarketValue
         {
             get { return marketValue; }
@@ -175,7 +175,7 @@ namespace StockWorm.Domain
         }
 
         private double negoValue = 0;
-        [Description("流通市值（万元）")]
+        [Description("流通市值（亿）")]
         public double NegoValue
         {
             get { return negoValue; }
