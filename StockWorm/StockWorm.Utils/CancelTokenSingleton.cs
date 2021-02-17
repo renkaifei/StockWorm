@@ -15,11 +15,11 @@ namespace StockWorm.Utils
 
         public static CancelTokenSingleton GetInstance()
         {
-            if(instance == null)
+            if (instance == null)
             {
-                lock(obj)
+                lock (obj)
                 {
-                    if(instance == null)
+                    if (instance == null)
                     {
                         instance = new CancelTokenSingleton();
                     }
@@ -30,12 +30,28 @@ namespace StockWorm.Utils
 
         public CancellationToken Token
         {
-            get { return source.Token;  }
+            get
+            {
+                return source.Token;
+            }
         }
 
         public void Cancel()
         {
             source.Cancel();
+        }
+
+        public void ThrowIfCancellationRequested()
+        {
+            if (source.IsCancellationRequested)
+            {
+                source.Token.ThrowIfCancellationRequested();
+            }
+        }
+    
+        public void BuildNewToken()
+        {
+            source.Dispose();
             source = new CancellationTokenSource();
         }
     }

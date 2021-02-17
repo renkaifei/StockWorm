@@ -16,6 +16,7 @@ using System.Threading;
 using StockWorm.Application.Service;
 using StockWorm.Domain;
 using StockWorm.Wpf.Component;
+using StockWorm.Utils;
 
 namespace StockWorm.Wpf
 {
@@ -25,7 +26,6 @@ namespace StockWorm.Wpf
     public partial class MainWindow : Window
     {
         private Task syncSecurityInfoFromSSETask;
-        private CancellationTokenSource syncSecurityInfoFromSSETaskSource;
         private bool isRunning = false;
         private System.Threading.Timer myTimer;
         public MainWindow()
@@ -40,7 +40,7 @@ namespace StockWorm.Wpf
 
         private void syncSecurityInfoFromSSE()
         {
-            syncSecurityInfoFromSSETaskSource = new CancellationTokenSource();
+            isRunning = true;
             syncSecurityInfoFromSSETask = Task.Factory.StartNew(() =>{
                 try
                 {
@@ -49,17 +49,22 @@ namespace StockWorm.Wpf
                     SecurityDayQuotationService dayQuotationService = new SecurityDayQuotationService();
                     dayQuotationService.SyncSSEDayQuotationFromWangYI();
                 }
+                catch(OperationCanceledException)
+                {
+                    CancelTokenSingleton.GetInstance().BuildNewToken();
+                }
                 catch(Exception ex)
                 {
+                    CancelTokenSingleton.GetInstance().Cancel();
+                    CancelTokenSingleton.GetInstance().ThrowIfCancellationRequested();
                     this.Dispatcher.Invoke(new Action<string>(ShowMessage),ex.Message);
                 }
                 finally
                 {
                     isRunning = false;
-                    syncSecurityInfoFromSSETaskSource.Cancel();
+                    this.Dispatcher.Invoke(new Action<string>(ShowMessage),"采集停止");
                 }
-            },syncSecurityInfoFromSSETaskSource.Token,TaskCreationOptions.LongRunning,TaskScheduler.Default);
-            isRunning = true;
+            },CancelTokenSingleton.GetInstance().Token,TaskCreationOptions.LongRunning,TaskScheduler.Default);
         }
 
         private void BtnStartCollecting_Click(object sender,RoutedEventArgs e)
@@ -80,14 +85,13 @@ namespace StockWorm.Wpf
             if(!isRunning) return;
             ShowMessage("停止股票信息采集");
             isRunning = false;
-            syncSecurityInfoFromSSETaskSource.Cancel();
+            CancelTokenSingleton.GetInstance().Cancel();
         }
 
         private void BtnSSESecurityInfo_Click(object sender,RoutedEventArgs e)
         {
             SecurityService securityService = new SecurityService();
             List<SecurityDomain> securities = securityService.GetListInPage(1,50,"SSE");
-
         }
 
         private void ShowMessage(string message)

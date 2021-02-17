@@ -108,7 +108,7 @@ namespace StockWorm.Domain
             tempTask.SecurityCode = securityCode;
             tempTask.ExchangeMarket = exchangeMarket;
             tempTask.BeginDate = listingDate;
-            tempTask.EndDate = listingDate.AddMonths(1);
+            tempTask.EndDate = listingDate.AddYears(1);
             if(tempTask.EndDate.Date >= DateTime.Now.Date)
             {
                 tempTask.EndDate = DateTime.Now.AddDays(-1).Date;
