@@ -49,6 +49,7 @@ namespace StockWorm.Repository.Context
             {
                 transaction.Dispose();
                 transaction = null;
+                CloseConnection();
             }
         }
         public void RollbackTransaction()
@@ -65,6 +66,7 @@ namespace StockWorm.Repository.Context
             {
                 transaction.Dispose();
                 transaction = null;
+                CloseConnection();
             }
         }
         public void ExecuteDataReader(Action<DbDataReader> action, string sql, params DbParameter[] DbParams)

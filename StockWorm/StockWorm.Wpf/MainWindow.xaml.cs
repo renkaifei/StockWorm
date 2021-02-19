@@ -48,6 +48,7 @@ namespace StockWorm.Wpf
                     securityService.SyncSecuritiesFromSSE();
                     SecurityDayQuotationService dayQuotationService = new SecurityDayQuotationService();
                     dayQuotationService.SyncSSEDayQuotationFromWangYI();
+                    
                 }
                 catch(OperationCanceledException)
                 {
@@ -55,14 +56,14 @@ namespace StockWorm.Wpf
                 }
                 catch(Exception ex)
                 {
+                    this.Dispatcher.Invoke(new Action<string,string>(ShowMessage),ex.Message,"Error");
                     CancelTokenSingleton.GetInstance().Cancel();
                     CancelTokenSingleton.GetInstance().ThrowIfCancellationRequested();
-                    this.Dispatcher.Invoke(new Action<string>(ShowMessage),ex.Message);
                 }
                 finally
                 {
                     isRunning = false;
-                    this.Dispatcher.Invoke(new Action<string>(ShowMessage),"采集停止");
+                    this.Dispatcher.Invoke(new Action<string,string>(ShowMessage),"采集停止","");
                 }
             },CancelTokenSingleton.GetInstance().Token,TaskCreationOptions.LongRunning,TaskScheduler.Default);
         }
@@ -70,7 +71,7 @@ namespace StockWorm.Wpf
         private void BtnStartCollecting_Click(object sender,RoutedEventArgs e)
         {
             if(isRunning) return;
-            ShowMessage("开启股票信息采集");
+            ShowMessage("开启股票信息采集","");
             syncSecurityInfoFromSSE();
             DateTime nextDay = DateTime.Now.AddDays(1).Date;
             long dueTime = (long)(nextDay - DateTime.Now).TotalMilliseconds;
@@ -83,7 +84,7 @@ namespace StockWorm.Wpf
         private void BtnStopCollecting_Click(object sender,RoutedEventArgs e)
         {
             if(!isRunning) return;
-            ShowMessage("停止股票信息采集");
+            ShowMessage("停止股票信息采集","");
             isRunning = false;
             CancelTokenSingleton.GetInstance().Cancel();
         }
@@ -94,11 +95,11 @@ namespace StockWorm.Wpf
             List<SecurityDomain> securities = securityService.GetListInPage(1,50,"SSE");
         }
 
-        private void ShowMessage(string message)
+        private void ShowMessage(string message,string messageType)
         {
-           txtErrorMessage.Text = message;
+           txtErrorMessage.Text = txtErrorMessage.Text + string.Format("{0}:{1}:{2}",
+           DateTime.Now.ToString(),messageType == "Error" ? "错误信息":"信息",message) + Environment.NewLine;
         }
-
         
     }
 }
