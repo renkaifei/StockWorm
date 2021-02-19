@@ -57,8 +57,6 @@ namespace StockWorm.Wpf
                 catch(Exception ex)
                 {
                     this.Dispatcher.Invoke(new Action<string,string>(ShowMessage),ex.Message,"Error");
-                    CancelTokenSingleton.GetInstance().Cancel();
-                    CancelTokenSingleton.GetInstance().ThrowIfCancellationRequested();
                 }
                 finally
                 {
