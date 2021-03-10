@@ -27,5 +27,76 @@ namespace StockWorm.Repository.Context
         {
             return new SqlParameter(){ ParameterName=name,DbType = dbType,Value = value };
         }
+    
+        public override void CreateDatabase(string source,string databaseName,string userID,string pwd,string databasePath)
+        {
+            connectionString = string.Format("Data Source={0};Initial Catalog={1};User ID={2};Password={3};",
+                                    source,"master",userID,pwd);
+            string sqlDatabaseCheckSql = "select 1 From master.dbo.sysdatabases where name=@DatabaseName";
+            SqlParameter prmDatabaseName = new SqlParameter("@DatabaseName",SqlDbType.NVarChar,128){ Value = databaseName };
+            bool existsDb = false;
+            ExecuteDataReader(reader =>{
+                existsDb = reader.HasRows;
+            },sqlDatabaseCheckSql,prmDatabaseName);
+            if(existsDb) throw new ArgumentException(string.Format("数据库[{0}]已经存在",databaseName));
+            
+            string databaseCreateSql = string.Format(@"CREATE DATABASE {0} ON PRIMARY
+                                        (
+                                            NAME= {1} ,
+                                            FILENAME= '{2}',
+                                            SIZE=100MB,
+                                            filegrowth=50MB
+                                        )
+                                        LOG ON
+                                        (
+                                            name= {3},
+                                            filename= '{4}',
+                                            SIZE=100MB,
+                                            filegrowth=50MB
+                                        )",databaseName,string.Format("{0}_data",databaseName),databasePath + "\\" + string.Format("{0}_data",databaseName) + ".mdf",
+                                        string.Format("{0}_log",databaseName),databasePath + "\\" + string.Format("{0}_log",databaseName) + ".ldf");
+            ExecuteNoQuery(databaseCreateSql);
+            connectionString = string.Format("Data Source={0};Initial Catalog={1};User ID={2};Password={3};",
+                                    source,databaseName,userID,pwd);
+            string securityTableSql = @"create table Security(
+                                SecurityID integer not null primary key identity(1,1),
+                                SecurityCode varchar(10) not null,
+                                SecurityAbbr varchar(128) not null,
+                                CompanyCode varchar(128) not null,
+                                CompanyAbbr varchar(128) not null,
+                                ListingDate DateTime not null,
+                                ExchangeMarket varchar(10) not null
+                            )";
+            string SecurityTaskTableSql = @"create table SecurityTask(
+                            TaskID integer not null primary key identity(1,1),
+                            SecurityCode varchar(10) not null,
+                            ExchangeMarket varchar(10) not null,
+                            BeginDate DateTime not null,
+                            EndDate DateTime not null,
+                            IsFinished int not null
+                        );";
+            string SecurityDayQuotationTableSql = @"create table SecurityDayQuotation
+                                                    (
+                                                        id integer not null primary key Identity(1,1),
+                                                        SecurityCode varchar(10) not null,
+                                                        TxDate DateTime not null,
+                                                        ClosePrice float not null,
+                                                        HighPrice float not null,
+                                                        LowPrice float not null,
+                                                        OpenPrice float not null,
+                                                        LastClosePrice float not null,
+                                                        PriceChange float not null,
+                                                        Change float not null,
+                                                        TurnOver float not null,
+                                                        VolumeTurnOver float not null,
+                                                        PriceTurnOver float not null,
+                                                        MarketValue float not null,
+                                                        NegoValue float not null
+                                                    )";
+
+            ExecuteNoQuery(securityTableSql);
+            ExecuteNoQuery(SecurityTaskTableSql);
+            ExecuteNoQuery(SecurityDayQuotationTableSql);
+        }
     }
 }

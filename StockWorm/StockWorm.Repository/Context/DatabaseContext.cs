@@ -81,6 +81,7 @@ namespace StockWorm.Repository.Context
                     if(InTrans()) command.Transaction = transaction;
                     DbDataReader reader = command.ExecuteReader();
                     action(reader);
+                    command.Parameters.Clear();
                 }
                 if(!InTrans()) CloseConnection();
             }
@@ -113,6 +114,6 @@ namespace StockWorm.Repository.Context
                 throw ex;
             }
         }
-    
+        public abstract void CreateDatabase(string source,string databaseName,string userID,string pwd,string databasePath);
     }
 }
