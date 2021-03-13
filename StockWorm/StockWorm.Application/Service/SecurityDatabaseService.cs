@@ -1,13 +1,16 @@
 using StockWorm.Repository.Context;
+using StockWorm.Domain;
 
 namespace StockWorm.Application.Service
 {
     public class SecurityDatabaseService
     {
-        public void CreateDatabase(string source,string databaseName,string userID,string pwd,string databasePath,string dbType)
+        public void CreateDatabase(DatabaseConfig config)
         {
-            DatabaseContext dbContext = DatabaseContextFactory.GetInstance().CreateDatabaseContext(dbType);
-            dbContext.CreateDatabase(source,databaseName,userID,pwd,databasePath);
+            DatabaseContextFactory factory = new DatabaseContextFactory();
+            DatabaseContext dbContext = factory.CreateDatabaseContext(config.DatabaseType);
+            dbContext.CreateDatabase(config);
+            config.Save();
         }
     }
 }

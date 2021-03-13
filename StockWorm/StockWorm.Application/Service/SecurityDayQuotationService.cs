@@ -17,7 +17,8 @@ namespace StockWorm.Application.Service
 
         public void SyncSSEDayQuotationFromWangYI()
         {
-            DatabaseContext dbContext = DatabaseContextFactory.GetInstance().CreateDatabaseContext();
+            DatabaseContextFactory factory = new DatabaseContextFactory();
+            DatabaseContext dbContext = factory.CreateDatabaseContext();
             SecurityDayQuotationRepository securityDayQuotationRepository = SecurityDayQuotationRepositoryFactory.GetInstance().Create(dbContext);
             SecurityTaskRepository securityTaskRepository = SecurityTaskRepositoryFactory.GetInstance().Create(dbContext);
             SecurityDayQuotationFromWangYIRepository securityDayQuotationFromWangYIRepository = new SecurityDayQuotationFromWangYIRepository();

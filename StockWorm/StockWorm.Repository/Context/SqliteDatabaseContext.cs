@@ -4,6 +4,7 @@ using StockWorm.Utils;
 using System.Data;
 using System.Data.Common;
 using System.IO;
+using StockWorm.Domain;
 
 namespace StockWorm.Repository.Context
 {
@@ -27,14 +28,16 @@ namespace StockWorm.Repository.Context
             return new SqliteParameter(){ ParameterName=name,DbType = dbType,Value = value };
         }
 
-        public override void CreateDatabase(string source,string databaseName,string userID,string pwd,string databasePath)
+        public override void CreateDatabase(DatabaseConfig config)
         {
-            if(File.Exists(databasePath + "\\" + databaseName + ".db")) 
+            SqliteDatabaseConfig sqliteConfig = config as SqliteDatabaseConfig;
+            FileInfo sqliteFile = new FileInfo(sqliteConfig.DataSource);
+            if(File.Exists(sqliteConfig.DataSource)) 
             {
-                throw new Exception(string.Format("数据库[{0}]在路径[{1}]下已经创建完成",databaseName,source));
+                throw new Exception("指定的数据库已经存在");
             }
             connectionString = string.Format("Data Source={0};Cache=Shared;",
-                                    databasePath + "\\" + databaseName + ".db");
+                                    sqliteConfig.DataSource);
             string securityTableSql = @"create table if not exists Security
                                         (
                                             SecurityID integer not null primary key AUTOINCREMENT,

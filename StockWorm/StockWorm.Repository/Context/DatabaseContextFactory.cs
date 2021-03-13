@@ -5,28 +5,6 @@ namespace StockWorm.Repository.Context
 {
     public class DatabaseContextFactory
     {
-        private static DatabaseContextFactory instance;
-        private static object obj = new object();
-        private DatabaseContextFactory() 
-        {
-            
-        }
-
-        public static DatabaseContextFactory GetInstance()
-        {
-            if(instance == null)
-            {
-                lock(obj)
-                {
-                    if(instance == null)
-                    {
-                        instance = new DatabaseContextFactory();
-                    }
-                }
-            }
-            return instance;
-        }
-
         public DatabaseContext CreateDatabaseContext()
         {
             string databaseType = AppSetting.GetInstance().GetDatabaseType();

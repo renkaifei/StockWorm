@@ -11,7 +11,8 @@ namespace StockWorm.Application.Service
     {
         public void SyncSecuritiesFromSSE()
         {
-            DatabaseContext dbContext = DatabaseContextFactory.GetInstance().CreateDatabaseContext();
+            DatabaseContextFactory factory = new DatabaseContextFactory();
+            DatabaseContext dbContext = factory.CreateDatabaseContext();
             SecurityRepository securityRepo = SecurityRepositoryFactory.GetInstance().Create(dbContext);
             SecurityTaskRepository securityTaskRepository = SecurityTaskRepositoryFactory.GetInstance().Create(dbContext);
             SecurityFromSSERepository securityFromSSERepository = new SecurityFromSSERepository();

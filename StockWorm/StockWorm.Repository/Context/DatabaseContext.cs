@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using StockWorm.Utils;
+using StockWorm.Domain;
 
 namespace StockWorm.Repository.Context
 {
@@ -114,6 +115,6 @@ namespace StockWorm.Repository.Context
                 throw ex;
             }
         }
-        public abstract void CreateDatabase(string source,string databaseName,string userID,string pwd,string databasePath);
+        public abstract void CreateDatabase(DatabaseConfig config);
     }
 }

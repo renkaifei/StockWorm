@@ -13,7 +13,8 @@ namespace StockWorm.Repository.Sqlite
 
         public SecurityTaskRepositorySqlite()
         {
-            dbContext = DatabaseContextFactory.GetInstance().CreateDatabaseContext();
+            DatabaseContextFactory factory = new DatabaseContextFactory();
+            dbContext = factory.CreateDatabaseContext();
         }
 
         public SecurityTaskRepositorySqlite(DatabaseContext dbContext):this()

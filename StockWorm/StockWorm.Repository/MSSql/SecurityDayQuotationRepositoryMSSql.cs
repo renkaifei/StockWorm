@@ -14,7 +14,8 @@ namespace StockWorm.Repository.MSSql
         private DatabaseContext dbContext;
         public SecurityDayQuotationRepositoryMSSql()
         {
-            this.dbContext = DatabaseContextFactory.GetInstance().CreateDatabaseContext("mssql");
+            DatabaseContextFactory factory = new DatabaseContextFactory();
+            this.dbContext = factory.CreateDatabaseContext("mssql");
         }
 
         public SecurityDayQuotationRepositoryMSSql(DatabaseContext dbContext) : this()

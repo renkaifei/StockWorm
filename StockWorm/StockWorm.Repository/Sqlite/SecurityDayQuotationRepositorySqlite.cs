@@ -14,7 +14,8 @@ namespace StockWorm.Repository.Sqlite
         private DatabaseContext dbContext;
         public SecurityDayQuotationRepositorySqlite()
         {
-            this.dbContext = DatabaseContextFactory.GetInstance().CreateDatabaseContext("sqlite");
+            DatabaseContextFactory factory = new DatabaseContextFactory();
+            this.dbContext = factory.CreateDatabaseContext("sqlite");
         }
 
         public SecurityDayQuotationRepositorySqlite(DatabaseContext dbContext) : this()

@@ -3,6 +3,7 @@ using System.Data;
 using StockWorm.Utils;
 using System;
 using System.Data.Common;
+using StockWorm.Domain;
 
 namespace StockWorm.Repository.Context
 {
@@ -28,17 +29,18 @@ namespace StockWorm.Repository.Context
             return new SqlParameter(){ ParameterName=name,DbType = dbType,Value = value };
         }
     
-        public override void CreateDatabase(string source,string databaseName,string userID,string pwd,string databasePath)
+        public override void CreateDatabase(DatabaseConfig config)
         {
+            MSSqlDatabaseConfig mssqlConfig = config as MSSqlDatabaseConfig;
             connectionString = string.Format("Data Source={0};Initial Catalog={1};User ID={2};Password={3};",
-                                    source,"master",userID,pwd);
+                                    mssqlConfig.DataSource,"master",mssqlConfig.UserID,mssqlConfig.Password);
             string sqlDatabaseCheckSql = "select 1 From master.dbo.sysdatabases where name=@DatabaseName";
-            SqlParameter prmDatabaseName = new SqlParameter("@DatabaseName",SqlDbType.NVarChar,128){ Value = databaseName };
+            SqlParameter prmDatabaseName = new SqlParameter("@DatabaseName",SqlDbType.NVarChar,128){ Value = mssqlConfig.InitialCatelog };
             bool existsDb = false;
             ExecuteDataReader(reader =>{
                 existsDb = reader.HasRows;
             },sqlDatabaseCheckSql,prmDatabaseName);
-            if(existsDb) throw new ArgumentException(string.Format("数据库[{0}]已经存在",databaseName));
+            if(existsDb) throw new ArgumentException(string.Format("数据库[{0}]已经存在",mssqlConfig.InitialCatelog ));
             
             string databaseCreateSql = string.Format(@"CREATE DATABASE {0} ON PRIMARY
                                         (
@@ -53,11 +55,11 @@ namespace StockWorm.Repository.Context
                                             filename= '{4}',
                                             SIZE=100MB,
                                             filegrowth=50MB
-                                        )",databaseName,string.Format("{0}_data",databaseName),databasePath + "\\" + string.Format("{0}_data",databaseName) + ".mdf",
-                                        string.Format("{0}_log",databaseName),databasePath + "\\" + string.Format("{0}_log",databaseName) + ".ldf");
+                                        )",mssqlConfig.InitialCatelog ,string.Format("{0}_data",mssqlConfig.InitialCatelog ),mssqlConfig.DatabasePath + "\\" + string.Format("{0}_data",mssqlConfig.InitialCatelog) + ".mdf",
+                                        string.Format("{0}_log",mssqlConfig.InitialCatelog),mssqlConfig.DatabasePath + "\\" + string.Format("{0}_log",mssqlConfig.InitialCatelog) + ".ldf");
             ExecuteNoQuery(databaseCreateSql);
             connectionString = string.Format("Data Source={0};Initial Catalog={1};User ID={2};Password={3};",
-                                    source,databaseName,userID,pwd);
+                                    mssqlConfig.DataSource,mssqlConfig.InitialCatelog,mssqlConfig.UserID,mssqlConfig.Password);
             string securityTableSql = @"create table Security(
                                 SecurityID integer not null primary key identity(1,1),
                                 SecurityCode varchar(10) not null,

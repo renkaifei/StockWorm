@@ -13,7 +13,8 @@ namespace StockWorm.Repository.MSSql
 
         public SecurityRepositoryMSSql()
         {
-            dbContext = DatabaseContextFactory.GetInstance().CreateDatabaseContext("mssql");
+            DatabaseContextFactory factory = new DatabaseContextFactory();
+            dbContext = factory.CreateDatabaseContext("mssql");
         }
 
         public SecurityRepositoryMSSql(DatabaseContext dbContext) : this()
