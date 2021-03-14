@@ -21,27 +21,60 @@ namespace StockWorm.WinForm
         }
 
         #region UI控件
+        private TableLayoutPanel layoutPanel;
         private CalendarGrid calendarGrid;
-        private Button btn1;
+        private TableLayoutPanel settingLayoutPanel;
+        private Button btnBuildCalendar;
+        private Button btnSetHoliday;
+        
         #endregion
 
         private void InitializeComponent()
         {
+            this.layoutPanel = new TableLayoutPanel();
+            this.calendarGrid = new CalendarGrid();
+            this.settingLayoutPanel = new TableLayoutPanel();
+            this.btnBuildCalendar = new Button();
+            this.btnSetHoliday = new Button();
+            this.settingLayoutPanel.SuspendLayout();
+            this.layoutPanel.SuspendLayout();
+            this.SuspendLayout();
+
+            settingLayoutPanel.RowCount = 5;
+            settingLayoutPanel.ColumnCount = 2;
+            settingLayoutPanel.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single ;
+            settingLayoutPanel.Dock = DockStyle.Fill;
+            settingLayoutPanel.Controls.Add(btnBuildCalendar,0,0);
+            settingLayoutPanel.Controls.Add(btnSetHoliday,1,0);
+
+            btnBuildCalendar.Text = "插入日历";
+            btnBuildCalendar.Size = new Size(100,30);
+
+            btnSetHoliday.Text = "设置假期";
+            btnSetHoliday.Size = new Size(100,30);
+
+            this.layoutPanel.RowCount = 1;
+            this.layoutPanel.ColumnCount = 2;
+            this.layoutPanel.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            this.layoutPanel.Dock = DockStyle.Fill;
+            this.layoutPanel.Controls.Add(this.calendarGrid,0,0);
+            this.layoutPanel.Controls.Add(settingLayoutPanel,1,0);
+
             this.Text = "日历";
-            this.Size = new Size(400, 400);
+            this.Size = new Size(800, 500);
             this.MinimizeBox = false;
             this.MaximizeBox = false;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.StartPosition = FormStartPosition.CenterParent;
             this.ShowIcon = false;
             this.Load += new EventHandler(CalendarForm_Load);
-
-
-            calendarGrid = new CalendarGrid();
-            this.Controls.Add(calendarGrid);
-
-            btn1 = new Button(){ Text = "aaa",Location = new Point(200,200) };
-            btn1.Click += new EventHandler(btn1_Click);
-            this.Controls.Add(btn1);
+            this.Controls.Add(this.layoutPanel);
+            this.settingLayoutPanel.ResumeLayout(false);
+            this.settingLayoutPanel.PerformLayout();
+            this.layoutPanel.ResumeLayout(false);
+            this.layoutPanel.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
         }
 
         public CalendarForm()
@@ -51,7 +84,6 @@ namespace StockWorm.WinForm
 
         private void CalendarForm_Load(object sender,EventArgs e)
         {
-            this.Size = new Size(600,800);
             calendarGrid.Build();
         }
 

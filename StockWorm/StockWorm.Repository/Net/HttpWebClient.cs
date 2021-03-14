@@ -72,7 +72,9 @@ namespace StockWorm.Repository.Net
         {
             try
             {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(string.Format("{0}?{1}", url, data));
+                string tempUrl = string.Format("{0}?{1}",url,data);
+                if(string.IsNullOrEmpty(data)) tempUrl = url;
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(tempUrl);
                 request.Method = "GET";
                 foreach (KeyValuePair<string, string> item in headers)
                 {

@@ -20,6 +20,9 @@ namespace StockWorm.Domain
             XmlElement dataSourceElem = doc.CreateElement("DataSource");
             dataSourceElem.InnerText = DataSource ;
             rootElem.AppendChild(dataSourceElem);
+            XmlElement databaseTypeElem = doc.CreateElement("Type");
+            databaseTypeElem.InnerText = "mssql";
+            rootElem.AppendChild(databaseTypeElem);
             string filePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + ConfigFileName;
             doc.Save(filePath);
         }
